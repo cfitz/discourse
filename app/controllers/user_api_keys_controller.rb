@@ -3,10 +3,15 @@ class UserApiKeysController < ApplicationController
   layout 'no_ember'
 
   requires_login only: [:create, :revoke, :undo_revoke]
-  skip_before_action :redirect_to_login_if_required, only: [:new]
+  skip_before_action :redirect_to_login_if_required, only: [:new, :show_key]
   skip_before_action :check_xhr, :preload_json
 
   AUTH_API_VERSION ||= 3
+
+  def show_key
+    params.require(:payload)
+    render plain: params[:payload]
+  end
 
   def new
 

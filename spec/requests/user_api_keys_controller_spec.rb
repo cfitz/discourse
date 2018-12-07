@@ -205,5 +205,30 @@ describe UserApiKeysController do
 
       expect(response.status).to eq(302)
     end
+
+    it "will redirect to itself and just show the payload" do
+      user = Fabricate(:user, trust_level: 0)
+      sign_in(user)
+
+      host = ActionController::Redirecting._compute_redirect_to_location(request, '')
+      args[:auth_redirect] = URI.join(host, '/user-api-key').to_s
+
+      SiteSetting.min_trust_level_for_user_api_key = 0
+      # we configure the app to redirect to /user-api-key
+      SiteSetting.allowed_user_api_auth_redirects = args[:auth_redirect]
+
+      post "/user-api-key.json", params: args
+      expect(response.status).to eq(302)
+
+      redirect = response.headers["Location"].gsub(host, '')
+      get redirect
+
+      encrypted = Base64.decode64(response.body)
+      key = OpenSSL::PKey::RSA.new(private_key)
+      parsed = JSON.parse(key.private_decrypt(encrypted))
+      api_key = UserApiKey.find_by(key: parsed["key"])
+      expect(api_key.user_id).to eq(user.id)
+
+    end
   end
 end

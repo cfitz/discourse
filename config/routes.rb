@@ -820,6 +820,7 @@ Discourse::Application.routes.draw do
 
   get "/user-api-key/new" => "user_api_keys#new"
   post "/user-api-key" => "user_api_keys#create"
+  get "/user-api-key" => "user_api_keys#show_key"
   post "/user-api-key/revoke" => "user_api_keys#revoke"
   post "/user-api-key/undo-revoke" => "user_api_keys#undo_revoke"
 
